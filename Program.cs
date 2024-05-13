@@ -47,4 +47,22 @@ app.MapGet("/products/get-all", async (ProductDbContext dbContext) =>
     return Results.Ok(products);
 });
 
+app.MapPut("/api/products/update/{id}", async (ProductDbContext dbContext, Product product, Guid id) =>
+{
+    var existingProduct = await dbContext.Products.FindAsync(id);
+
+    if (existingProduct == null)
+        return Results.NotFound("Product not found");
+
+    existingProduct.Name = product.Name ?? existingProduct.Name;
+    existingProduct.Description = product.Description ?? existingProduct.Description;
+    existingProduct.Price = product.Price != default ? product.Price : existingProduct.Price;
+    existingProduct.QuantityInStock = product.QuantityInStock != default ? product.QuantityInStock : existingProduct.QuantityInStock;
+    existingProduct.Details = product.Details ?? existingProduct.Details;
+
+    await dbContext.SaveChangesAsync();
+
+    return Results.NoContent();
+});
+
 app.Run();
