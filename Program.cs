@@ -47,7 +47,7 @@ app.MapGet("/products/get-all", async (ProductDbContext dbContext) =>
     return Results.Ok(products);
 });
 
-app.MapPut("/api/products/update/{id}", async (ProductDbContext dbContext, Product product, Guid id) =>
+app.MapPut("/products/update/{id}", async (ProductDbContext dbContext, Product product, Guid id) =>
 {
     var existingProduct = await dbContext.Products.FindAsync(id);
 
