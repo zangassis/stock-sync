@@ -40,4 +40,11 @@ async Task SaveProductHistory(Product product, ProductDbContext dbContext)
     await dbContext.SaveChangesAsync();
 }
 
+app.MapGet("/products/get-all", async (ProductDbContext dbContext) =>
+{
+    var products = await dbContext.Products.ToListAsync();
+
+    return Results.Ok(products);
+});
+
 app.Run();
