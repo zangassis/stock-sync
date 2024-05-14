@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace StockSync.Models;
 
@@ -6,6 +7,8 @@ public class Product
 {
     public Guid Id { get; private set; }
     public string Name { get; set; }
+
+    [JsonPropertyName("display-text")]
     public string Description { get; set; }
     public decimal Price { get; set; }
     public int QuantityInStock { get; set; }

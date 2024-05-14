@@ -1,10 +1,22 @@
+using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StockSync.Data;
 using StockSync.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ProductDbContext>(x => x.UseSqlite(connectionString));
+builder.Logging.AddJsonConsole(options =>
+{
+    options.IncludeScopes = false;
+    options.TimestampFormat = "MM/dd/yyyy h:mm tt";
+    options.JsonWriterOptions = new JsonWriterOptions
+    {
+        Indented = true
+    };
+})
 
 var app = builder.Build();
 
@@ -63,6 +75,41 @@ app.MapPut("/products/update/{id}", async (ProductDbContext dbContext, Product p
     await dbContext.SaveChangesAsync();
 
     return Results.NoContent();
+});
+
+app.MapDelete("/products/delete/{id}", async (ProductDbContext dbContext, Guid id, [FromServices] ILogger<Program> logger) =>
+{
+    try
+    {
+        var existingProduct = await dbContext.Products.FindAsync(id);
+
+        dbContext.Products.Remove(existingProduct);
+
+        return Results.NoContent();
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex.Message);
+        return Results.NotFound("Product not found");
+    }
+});
+
+app.MapPost("/products/validate", async (ProductDbContext dbContext, Product product, [FromServices] ILogger<Program> logger) =>
+{
+    try
+    {
+        var existingProduct = dbContext.Products.First(p => p.Name == product.Name);
+
+        if (existingProduct != null)
+            return Results.BadRequest("The product name must be unique");
+
+        return Results.Ok();
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, $"Error validating the product.");
+        return Results.BadRequest(ex.Message);
+    }
 });
 
 app.Run();
