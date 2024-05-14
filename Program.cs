@@ -16,7 +16,7 @@ builder.Logging.AddJsonConsole(options =>
     {
         Indented = true
     };
-})
+});
 
 var app = builder.Build();
 
