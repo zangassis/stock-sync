@@ -54,7 +54,7 @@ StockSync uses a local SQLite database by default. Ensure that your `appsettings
 
 - Simple and intuitive API for stock management.
 - Lightweight and fast with minimal setup.
-- Uses Entity Framework Core with SQLite for seamless database operations.
+- Uses Entity Framework Core with SQLite for database operations.
 
 ## 📄 License
 
