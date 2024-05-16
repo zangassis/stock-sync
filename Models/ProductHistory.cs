@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace StockSync.Models;
 
 public class ProductHistory

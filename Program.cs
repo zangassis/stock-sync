@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using StockSync.Data;
 using StockSync.Models;
 
@@ -110,6 +111,49 @@ app.MapPost("/products/validate", async (ProductDbContext dbContext, Product pro
         logger.LogError(ex, $"Error validating the product.");
         return Results.BadRequest(ex.Message);
     }
+});
+
+app.MapGet("/products/get-by-id/{id}", async (ProductDbContext dbContext, Guid id) =>
+{
+    var product = await dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+
+    if (product == null)
+        return Results.NotFound();
+
+    JObject productJson = JObject.FromObject(new
+    {
+        product.Id,
+        product.Name,
+        Description = product.Description ?? string.Empty,
+        product.Price,
+        product.QuantityInStock,
+        product.Details,
+        product.CreatedAt
+    });
+
+    var productHistories = dbContext.ProductHistories.ToList();
+
+    var foundProductHistory = (
+        from ph in productHistories
+        let productObj = JObject.Parse(ph.Product)
+        let name = productObj["Name"].ToString()
+        where name == product.Name
+        select ph
+    ).FirstOrDefault();
+
+    if (foundProductHistory is null)
+    {
+        var ProductHistory = new ProductHistory()
+        {
+            Id = Guid.NewGuid(),
+            Product = productJson.ToString()
+        };
+
+        dbContext.ProductHistories.Add(ProductHistory);
+        await dbContext.SaveChangesAsync();
+    }
+
+    return Results.Ok(product);
 });
 
 app.Run();
