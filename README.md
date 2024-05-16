@@ -9,7 +9,6 @@ Welcome to **StockSync**, a minimalistic ASP.NET Core API for managing stock inv
 ### Prerequisites
 
 - .NET 8.0 SDK or Higher
-- SQLite
 
 ### Installation
 
